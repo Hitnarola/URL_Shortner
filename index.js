@@ -1,6 +1,8 @@
 import express from "express";
 import userrouter from "./routes/user.routes.js";
+import urlrouter from "./routes/url.routes.js";
 import { authenticationMiddleware } from "./middleware/auth.middleware.js";
+
 const app = express();
 
 const PORT = process.env.PORT || 8000;
@@ -8,6 +10,8 @@ const PORT = process.env.PORT || 8000;
 app.use(express.json());
 app.use(authenticationMiddleware);
 app.use("/user", userrouter);
+app.use(urlrouter);
+
 app.use("/", (req, res) => {
   return res.json({ status: "server is up and running" });
 });

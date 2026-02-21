@@ -33,7 +33,7 @@ router.post("/signup", async (req, res) => {
   return res.status(201).json({ data: { userId: user.id } });
 });
 
-router.get("/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   const validationresult = await loginPostRequestBodySchema.safeParseAsync(
     req.body,
   );
