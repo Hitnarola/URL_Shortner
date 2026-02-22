@@ -205,12 +205,7 @@ function getAvatarUrl(user) {
 }
 
 function updateCurrentUserCard(user) {
-  if (
-    !currentUserCard ||
-    !currentUserAvatar ||
-    !currentUserName ||
-    !currentUserEmail
-  ) {
+  if (!currentUserCard || !currentUserAvatar || !currentUserName) {
     return;
   }
 
@@ -218,7 +213,6 @@ function updateCurrentUserCard(user) {
     currentUserProfile = null;
     currentUserCard.classList.add("d-none");
     currentUserName.textContent = "";
-    currentUserEmail.textContent = "";
     currentUserAvatar.removeAttribute("src");
     if (profileNameField) {
       profileNameField.value = "";
@@ -230,9 +224,7 @@ function updateCurrentUserCard(user) {
   }
 
   currentUserProfile = user;
-  const email = String(user?.email || "").trim();
   currentUserName.textContent = getUserDisplayName(user);
-  currentUserEmail.textContent = email || "No email";
   currentUserAvatar.src = getAvatarUrl(user);
   currentUserCard.classList.remove("d-none");
 }
