@@ -367,20 +367,30 @@ async function loadOwnerDashboard() {
     return;
   }
 
+  let me = null;
   try {
-    const me = await api("/user/me");
-    updateCurrentUserCard(me?.user || null);
-
-    if (!me?.isOwner) {
-      clearAdminDashboard();
-      return;
-    }
-
-    const ownerData = await api("/admin/overview");
-    renderAdminDashboard(ownerData);
-  } catch {
+    me = await api("/user/me");
+  } catch (error) {
     updateCurrentUserCard(null);
     clearAdminDashboard();
+    console.error("Failed to load current user:", error);
+    return;
+  }
+
+  updateCurrentUserCard(me?.user || null);
+
+  if (!me?.isOwner) {
+    clearAdminDashboard();
+    return;
+  }
+
+  try {
+    const ownerData = await api("/admin/overview");
+    renderAdminDashboard(ownerData);
+  } catch (error) {
+    clearAdminDashboard();
+    showMessage(`Owner dashboard error: ${error.message}`, "warning");
+    console.error("Failed to load owner dashboard:", error);
   }
 }
 
@@ -450,6 +460,28 @@ function hideMessage() {
   statusMessage.textContent = "";
 }
 
+function getReadableApiError(payload, status) {
+  if (typeof payload?.error === "string" && payload.error.trim()) {
+    return payload.error;
+  }
+
+  if (payload?.error && typeof payload.error === "object") {
+    const firstField = Object.values(payload.error)[0];
+    const firstIssue =
+      firstField &&
+      typeof firstField === "object" &&
+      Array.isArray(firstField._errors)
+        ? firstField._errors[0]
+        : null;
+
+    if (typeof firstIssue === "string" && firstIssue.trim()) {
+      return firstIssue;
+    }
+  }
+
+  return `Request failed (${status})`;
+}
+
 async function api(path, options = {}) {
   const token = getToken();
 
@@ -478,10 +510,7 @@ async function api(path, options = {}) {
   }
 
   if (!response.ok) {
-    const errorMessage =
-      payload?.error && typeof payload.error === "string"
-        ? payload.error
-        : `Request failed (${response.status})`;
+    const errorMessage = getReadableApiError(payload, response.status);
     throw new Error(errorMessage);
   }
 
