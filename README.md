@@ -115,6 +115,52 @@ Open: **http://localhost:8000**
 
 ---
 
+## ▲ Deploy on Vercel
+
+### 1) Push code to GitHub
+
+Make sure your latest changes are pushed to your repository.
+
+### 2) Import Project in Vercel
+
+- Go to Vercel Dashboard
+- Click **Add New Project**
+- Select this GitHub repository
+
+### 3) Configure Project
+
+- Framework Preset: **Other**
+- Install Command: `pnpm install`
+- Build Command: _(leave empty)_
+- Output Directory: _(leave empty)_
+
+### 4) Add Environment Variables
+
+Set these in **Project Settings → Environment Variables**:
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `OWNER_EMAIL`
+- `GOOGLE_CLIENT_ID` (optional if Google Sign-In is used)
+
+> `PORT` is managed by Vercel automatically.
+
+### 5) Run database schema push
+
+Run this against your hosted PostgreSQL database:
+
+```bash
+pnpm db:push
+```
+
+### 6) Google OAuth production origin (if enabled)
+
+Add your Vercel domain to Google OAuth **Authorized JavaScript origins**, for example:
+
+- `https://your-project.vercel.app`
+
+---
+
 ## 🔐 Google Sign-In Setup
 
 1. Open Google Cloud Console: https://console.cloud.google.com/
@@ -153,6 +199,8 @@ Open: **http://localhost:8000**
 
 ```text
 URL_Shortner/
+├── api/
+│   └── index.js
 ├── db/
 ├── middleware/
 ├── model/
@@ -168,6 +216,8 @@ URL_Shortner/
 ├── drizzle.config.js
 ├── index.js
 ├── package.json
+├── server.js
+├── vercel.json
 └── README.md
 ```
 
