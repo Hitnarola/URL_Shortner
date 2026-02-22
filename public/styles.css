@@ -109,6 +109,79 @@
   backdrop-filter: blur(10px);
 }
 
+.current-user-card {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(255, 255, 255, 0.88);
+  min-width: 190px;
+}
+
+.current-user-trigger {
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+
+.current-user-trigger:hover,
+.current-user-trigger:focus,
+.current-user-trigger:active {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(59, 130, 246, 0.26) !important;
+}
+
+.current-user-trigger.dropdown-toggle::after {
+  margin-left: 0.45rem;
+}
+
+.profile-menu {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 0.85rem;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.1);
+  padding: 0.35rem;
+}
+
+.profile-menu .dropdown-item {
+  border-radius: 0.6rem;
+}
+
+.profile-menu .dropdown-item:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.current-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+}
+
+.current-user-meta {
+  min-width: 0;
+  line-height: 1.08;
+}
+
+.current-user-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  max-width: 130px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.current-user-email {
+  font-size: 0.72rem;
+  color: #64748b;
+  max-width: 130px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .app-card {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.18);
@@ -171,6 +244,10 @@
 
   .hero-card {
     padding: 1.25rem !important;
+  }
+
+  .current-user-card {
+    min-width: 170px;
   }
 
   .table th,

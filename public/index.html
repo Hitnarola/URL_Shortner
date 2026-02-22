@@ -24,9 +24,51 @@
           <span class="badge text-bg-light border px-3 py-2"
             >Modern URL Shortener</span
           >
-          <span id="authState" class="badge text-bg-secondary px-3 py-2"
-            >Guest</span
-          >
+          <div class="d-flex align-items-center gap-2 ms-auto">
+            <span id="authState" class="badge text-bg-secondary px-3 py-2"
+              >Guest</span
+            >
+            <div id="currentUserCard" class="dropdown d-none">
+              <button
+                class="btn current-user-card current-user-trigger dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <img
+                  id="currentUserAvatar"
+                  class="current-user-avatar"
+                  alt="Current user avatar"
+                />
+                <div class="current-user-meta text-start">
+                  <p id="currentUserName" class="current-user-name mb-0"></p>
+                  <p id="currentUserEmail" class="current-user-email mb-0"></p>
+                </div>
+              </button>
+
+              <ul class="dropdown-menu dropdown-menu-end profile-menu">
+                <li>
+                  <button
+                    id="manageProfileBtn"
+                    class="dropdown-item"
+                    type="button"
+                  >
+                    Manage Profile
+                  </button>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <button
+                    id="profileLogoutBtn"
+                    class="dropdown-item text-danger"
+                    type="button"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
         <h1 class="display-6 fw-bold text-primary mb-2">
           Short links, clean dashboard, fast workflow.
@@ -211,15 +253,6 @@
                     <span id="totalLinks" class="fw-semibold">0</span>
                   </p>
                 </div>
-                <div class="d-flex gap-2">
-                  <button
-                    id="logoutBtn"
-                    class="btn btn-sm btn-outline-danger"
-                    type="button"
-                  >
-                    Logout
-                  </button>
-                </div>
               </div>
 
               <form id="shortenForm" class="mb-4">
@@ -352,6 +385,57 @@
         </section>
       </div>
     </main>
+
+    <div
+      class="modal fade"
+      id="profileModal"
+      tabindex="-1"
+      aria-labelledby="profileModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-sm rounded-4">
+          <div class="modal-header">
+            <h5 class="modal-title" id="profileModalLabel">Manage Profile</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label" for="profileName">Name</label>
+              <input
+                id="profileName"
+                class="form-control"
+                type="text"
+                readonly
+              />
+            </div>
+            <div>
+              <label class="form-label" for="profileEmail">Email</label>
+              <input
+                id="profileEmail"
+                class="form-control"
+                type="email"
+                readonly
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

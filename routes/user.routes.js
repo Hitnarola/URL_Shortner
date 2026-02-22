@@ -71,7 +71,14 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ error: "invalid password" });
 
   const token = await createUserToken({ id: user.id });
-  return res.json({ token });
+  return res.json({
+    token,
+    user: {
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+    },
+  });
 });
 
 router.get("/google/config", async (_req, res) => {
@@ -147,7 +154,14 @@ router.post("/google", async (req, res) => {
   }
 
   const token = await createUserToken({ id: user.id });
-  return res.status(200).json({ token });
+  return res.status(200).json({
+    token,
+    user: {
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+    },
+  });
 });
 
 router.get("/me", ensureAuthenticate, async (req, res) => {

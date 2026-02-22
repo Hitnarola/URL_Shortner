@@ -3,7 +3,6 @@ const signupForm = document.getElementById("signupForm");
 const shortenForm = document.getElementById("shortenForm");
 const urlTableBody = document.getElementById("urlTableBody");
 const statusMessage = document.getElementById("statusMessage");
-const logoutBtn = document.getElementById("logoutBtn");
 const authState = document.getElementById("authState");
 const totalLinks = document.getElementById("totalLinks");
 const adminDashboard = document.getElementById("adminDashboard");
@@ -14,6 +13,15 @@ const adminRecentUrlsBody = document.getElementById("adminRecentUrlsBody");
 const googleSignInBtn = document.getElementById("googleSignInBtn");
 const bgShapeOne = document.querySelector(".bg-shape-one");
 const bgShapeTwo = document.querySelector(".bg-shape-two");
+const currentUserCard = document.getElementById("currentUserCard");
+const currentUserAvatar = document.getElementById("currentUserAvatar");
+const currentUserName = document.getElementById("currentUserName");
+const currentUserEmail = document.getElementById("currentUserEmail");
+const manageProfileBtn = document.getElementById("manageProfileBtn");
+const profileLogoutBtn = document.getElementById("profileLogoutBtn");
+const profileModalElement = document.getElementById("profileModal");
+const profileNameField = document.getElementById("profileName");
+const profileEmailField = document.getElementById("profileEmail");
 
 const storageKey = "url_shortener_token";
 const cursorGlow = document.createElement("div");
@@ -29,6 +37,8 @@ let glowX = pointerX;
 let glowY = pointerY;
 let trailX = pointerX;
 let trailY = pointerY;
+let currentUserProfile = null;
+let profileModal = null;
 
 function updateCursorMotion() {
   glowX += (pointerX - glowX) * 0.12;
@@ -182,6 +192,78 @@ function updateAuthState() {
   authState.textContent = "Guest";
 }
 
+function getUserDisplayName(user) {
+  const first = String(user?.firstname || "").trim();
+  const last = String(user?.lastname || "").trim();
+  const full = `${first} ${last}`.trim();
+  return full || "User";
+}
+
+function getAvatarUrl(user) {
+  const name = encodeURIComponent(getUserDisplayName(user));
+  return `https://ui-avatars.com/api/?name=${name}&background=eff6ff&color=1d4ed8&bold=true&size=128`;
+}
+
+function updateCurrentUserCard(user) {
+  if (
+    !currentUserCard ||
+    !currentUserAvatar ||
+    !currentUserName ||
+    !currentUserEmail
+  ) {
+    return;
+  }
+
+  if (!user) {
+    currentUserProfile = null;
+    currentUserCard.classList.add("d-none");
+    currentUserName.textContent = "";
+    currentUserEmail.textContent = "";
+    currentUserAvatar.removeAttribute("src");
+    if (profileNameField) {
+      profileNameField.value = "";
+    }
+    if (profileEmailField) {
+      profileEmailField.value = "";
+    }
+    return;
+  }
+
+  currentUserProfile = user;
+  const email = String(user?.email || "").trim();
+  currentUserName.textContent = getUserDisplayName(user);
+  currentUserEmail.textContent = email || "No email";
+  currentUserAvatar.src = getAvatarUrl(user);
+  currentUserCard.classList.remove("d-none");
+}
+
+function openManageProfileModal() {
+  if (!currentUserProfile) {
+    showMessage("Please login first.", "warning");
+    return;
+  }
+
+  if (profileNameField) {
+    profileNameField.value = getUserDisplayName(currentUserProfile);
+  }
+
+  if (profileEmailField) {
+    profileEmailField.value = String(currentUserProfile?.email || "").trim();
+  }
+
+  if (!profileModal && profileModalElement && window.bootstrap?.Modal) {
+    profileModal = new window.bootstrap.Modal(profileModalElement);
+  }
+
+  profileModal?.show();
+}
+
+async function performLogout() {
+  setToken(null);
+  showMessage("Logged out.", "info");
+  await loadCodes();
+}
+
 function showMessage(message, type = "info") {
   statusMessage.className = `alert alert-${type} mt-4 mb-0`;
   statusMessage.textContent = message;
@@ -280,12 +362,15 @@ function renderAdminDashboard(data) {
 
 async function loadOwnerDashboard() {
   if (!getToken()) {
+    updateCurrentUserCard(null);
     clearAdminDashboard();
     return;
   }
 
   try {
     const me = await api("/user/me");
+    updateCurrentUserCard(me?.user || null);
+
     if (!me?.isOwner) {
       clearAdminDashboard();
       return;
@@ -294,6 +379,7 @@ async function loadOwnerDashboard() {
     const ownerData = await api("/admin/overview");
     renderAdminDashboard(ownerData);
   } catch {
+    updateCurrentUserCard(null);
     clearAdminDashboard();
   }
 }
@@ -331,6 +417,9 @@ async function initGoogleSignIn() {
           });
 
           setToken(data.token);
+          if (data?.user) {
+            updateCurrentUserCard(data.user);
+          }
           showMessage("Logged in with Google.", "success");
           await loadCodes();
         } catch (error) {
@@ -444,6 +533,7 @@ async function loadCodes() {
         <td colspan="3" class="text-center text-secondary py-4">Login to view your links.</td>
       </tr>
     `;
+    updateCurrentUserCard(null);
     clearAdminDashboard();
     return;
   }
@@ -473,6 +563,9 @@ loginForm.addEventListener("submit", async (event) => {
     });
 
     setToken(data.token);
+    if (data?.user) {
+      updateCurrentUserCard(data.user);
+    }
     showMessage("Logged in successfully.", "success");
     loginForm.reset();
     await loadCodes();
@@ -560,11 +653,17 @@ urlTableBody.addEventListener("click", async (event) => {
   }
 });
 
-logoutBtn.addEventListener("click", async () => {
-  setToken(null);
-  showMessage("Logged out.", "info");
-  await loadCodes();
-});
+if (manageProfileBtn) {
+  manageProfileBtn.addEventListener("click", () => {
+    openManageProfileModal();
+  });
+}
+
+if (profileLogoutBtn) {
+  profileLogoutBtn.addEventListener("click", async () => {
+    await performLogout();
+  });
+}
 
 updateAuthState();
 clearAdminDashboard();
