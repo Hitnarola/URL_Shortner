@@ -21,6 +21,15 @@ It includes secure JWT authentication, custom short codes, a responsive dashboar
 
 ---
 
+## 🆕 New Features
+
+- 🧩 Enhanced frontend dashboard with user profile card and quick logout
+- 🟢 Google Sign-In flow using Google Identity Services (`/user/google/config`, `/user/google`)
+- 👑 Owner-only admin analytics panel with user counts, link counts, and latest URL activity
+- 🪪 `GET /user/me` now returns `isOwner` to enable role-based UI rendering
+
+---
+
 ## ✨ Features
 
 ### 👤 User
