@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import { db } from "../db/index.js";
 import { urlsTable } from "../model/url.model.js";
 import { ensureAuthenticate } from "../middleware/auth.middleware.js";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 const router = express.Router();
 
 router.post("/shorten", ensureAuthenticate, async (req, res) => {
@@ -37,6 +37,24 @@ router.post("/shorten", ensureAuthenticate, async (req, res) => {
   });
 });
 
+router.get("/codes", ensureAuthenticate, async (req, res) => {
+  const code = await db
+    .select()
+    .from(urlsTable)
+    .where(eq(urlsTable.userId, req.user.id));
+
+  return res.status(200).json({ code });
+});
+
+router.delete("/:id", ensureAuthenticate, async (req, res) => {
+  const id = req.params.id;
+  await db
+    .delete(urlsTable)
+    .where(and(eq(urlsTable.id, id), eq(urlsTable.userId, req.user.id)));
+
+    return res.status(200).json({delete:true})
+});
+
 router.get("/:shortcode", async (req, res) => {
   const code = req.params.shortcode;
 
@@ -49,6 +67,4 @@ router.get("/:shortcode", async (req, res) => {
 
   return res.redirect(result.targetURL);
 });
-
-router.ger('/')
 export default router;
