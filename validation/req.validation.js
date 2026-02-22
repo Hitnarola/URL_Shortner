@@ -2,14 +2,14 @@
 import { z } from "zod";
 
 export const signupPostRequestBodySchema = z.object({
-  firstname: z.string(),
-  lastname: z.string().optional(),
-  email: z.string().email(),
+  firstname: z.string().trim().min(1),
+  lastname: z.string().trim().min(1).optional(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(3),
 });
 
 export const loginPostRequestBodySchema = z.object({
-  email: z.string(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(3),
 });
 

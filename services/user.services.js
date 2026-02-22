@@ -38,5 +38,20 @@ export async function createNewUser(
   return user;
 }
 
+export async function getUserById(id) {
+  const [user] = await db
+    .select({
+      id: usertable.id,
+      firstname: usertable.firstname,
+      lastname: usertable.lastname,
+      email: usertable.email,
+      createdAt: usertable.createdAt,
+    })
+    .from(usertable)
+    .where(eq(usertable.id, id));
+
+  return user;
+}
+
 //in the services the we do the services provide the code write in this file
 //services = business/use-case logic that talks to DB or external systems.

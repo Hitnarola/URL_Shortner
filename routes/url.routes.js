@@ -3,9 +3,76 @@ import { shortenPostRequestBodySchema } from "../validation/req.validation.js";
 import { nanoid } from "nanoid";
 import { db } from "../db/index.js";
 import { urlsTable } from "../model/url.model.js";
+import { usertable } from "../model/user.model.js";
 import { ensureAuthenticate } from "../middleware/auth.middleware.js";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
+import { getUserById } from "../services/user.services.js";
 const router = express.Router();
+
+router.get("/admin/overview", ensureAuthenticate, async (req, res) => {
+  const currentUser = await getUserById(req.user.id);
+  if (!currentUser) {
+    return res.status(404).json({ error: "user not found" });
+  }
+
+  const ownerEmail = (process.env.OWNER_EMAIL || "").trim().toLowerCase();
+  if (!ownerEmail || currentUser.email.toLowerCase() !== ownerEmail) {
+    return res.status(403).json({ error: "owner access required" });
+  }
+
+  const users = await db
+    .select({
+      id: usertable.id,
+      firstname: usertable.firstname,
+      lastname: usertable.lastname,
+      email: usertable.email,
+      createdAt: usertable.createdAt,
+    })
+    .from(usertable);
+
+  const urls = await db
+    .select({
+      id: urlsTable.id,
+      shortcode: urlsTable.shortcode,
+      targetURL: urlsTable.targetURL,
+      userId: urlsTable.userId,
+      createdAt: urlsTable.createdAt,
+    })
+    .from(urlsTable);
+
+  const recentUrls = await db
+    .select({
+      id: urlsTable.id,
+      shortcode: urlsTable.shortcode,
+      targetURL: urlsTable.targetURL,
+      createdAt: urlsTable.createdAt,
+      userEmail: usertable.email,
+    })
+    .from(urlsTable)
+    .innerJoin(usertable, eq(urlsTable.userId, usertable.id))
+    .orderBy(desc(urlsTable.createdAt))
+    .limit(10);
+
+  const linksByUserId = new Map();
+  for (const item of urls) {
+    linksByUserId.set(item.userId, (linksByUserId.get(item.userId) || 0) + 1);
+  }
+
+  const usersWithLinkCount = users.map((user) => ({
+    ...user,
+    totalLinks: linksByUserId.get(user.id) || 0,
+  }));
+
+  return res.status(200).json({
+    summary: {
+      totalUsers: users.length,
+      totalLinks: urls.length,
+      ownerEmail,
+    },
+    users: usersWithLinkCount,
+    recentUrls,
+  });
+});
 
 router.post("/shorten", ensureAuthenticate, async (req, res) => {
   const validateresult = await shortenPostRequestBodySchema.safeParseAsync(
@@ -52,7 +119,7 @@ router.delete("/:id", ensureAuthenticate, async (req, res) => {
     .delete(urlsTable)
     .where(and(eq(urlsTable.id, id), eq(urlsTable.userId, req.user.id)));
 
-    return res.status(200).json({delete:true})
+  return res.status(200).json({ delete: true });
 });
 
 router.get("/:shortcode", async (req, res) => {
