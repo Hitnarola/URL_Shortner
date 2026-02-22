@@ -1,53 +1,175 @@
-# 📋 Project Requirements - URL Shortener API
+# 🔗 URL Shortener – Full-Stack Link Management Platform
 
-This document lists all the tools, technologies, and libraries used in the URL Shortener project. Ensure you have everything set up before beginning development.
-
----
-
-## ✅ Prerequisites
-
-Make sure you have the following installed on your system:
-
-- [Node.js](https://nodejs.org/) (v18 or above recommended)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [Postman](https://www.postman.com/)
-- A code editor (e.g., [VS Code](https://code.visualstudio.com/))
+<p align="center">
+	<img src="https://img.shields.io/badge/Node.js-Backend-green?logo=node.js" />
+	<img src="https://img.shields.io/badge/Express-API-black?logo=express" />
+	<img src="https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql" />
+	<img src="https://img.shields.io/badge/Drizzle-ORM-c5f74f" />
+	<img src="https://img.shields.io/badge/Bootstrap-UI-7952b3?logo=bootstrap" />
+	<img src="https://img.shields.io/badge/TailwindCSS-UI-38bdf8?logo=tailwindcss" />
+	<img src="https://img.shields.io/badge/Google-Sign--In-4285F4?logo=google" />
+	<img src="https://img.shields.io/badge/License-ISC-yellow" />
+</p>
 
 ---
 
-## 🧱 Tech Stack Overview
+## 🚀 Overview
 
-| Category         | Technology        | Purpose                               |
-| ---------------- | ----------------- | ------------------------------------- |
-| Backend          | Node.js + Express | REST API development                  |
-| Database         | PostgreSQL        | Relational data store                 |
-| ORM              | Drizzle ORM       | Type-safe database queries and schema |
-| Containerization | Docker + Compose  | Local PostgreSQL instance             |
-| Authentication   | JWT               | Securing private routes               |
-| Testing Tool     | Postman           | Manual API testing                    |
+**URL Shortener** is a modern full-stack web app to create, manage, and share short links.
+It includes secure JWT authentication, custom short codes, a responsive dashboard UI, and an
+**Owner Admin Dashboard** to view platform metrics and activity.
 
 ---
 
-## 📦 NPM Dependencies
+## ✨ Features
 
-Run this to install all required packages:
+### 👤 User
+
+- 🔐 Email/password signup and login
+- 🟢 Google Sign-In (login/signup via Google account)
+- ✂️ Create short links from long URLs
+- 🏷️ Optional custom short code while creating links
+- 📋 View all your created links
+- 🗑️ Delete your own links
+- 📱 Responsive UI (Bootstrap + TailwindCSS)
+
+### 🛠️ Owner/Admin
+
+- 🧾 Owner-only dashboard visibility (based on `OWNER_EMAIL`)
+- 📊 Platform summary: total users + total links
+- 👥 User table with per-user link count
+- 🕒 Recent links feed with owner email
+- 🔒 Protected admin API (`/admin/overview`)
+
+### ⚙️ Backend
+
+- 🧠 REST API with Express
+- 🗄️ PostgreSQL + Drizzle ORM
+- 🔑 JWT auth middleware (`Authorization: Bearer <token>`)
+- ✅ Input validation with Zod
+- ↪️ Redirect short code to original target URL
+
+---
+
+## 🧰 Tech Stack
+
+- **Backend:** Node.js, Express, PostgreSQL, Drizzle ORM, JWT, Zod
+- **Frontend:** HTML, Bootstrap 5, TailwindCSS, Vanilla JavaScript
+- **Auth:** Email/Password + Google Identity Services
+- **Tools:** Docker Compose, PNPM, Drizzle Kit
+
+---
+
+## 🏁 Getting Started
+
+### 1) Clone & Install
 
 ```bash
-npm install express drizzle-orm pg jsonwebtoken bcrypt dotenv
+git clone <your-repo-url>
+cd URL_Shortner
+pnpm install
 ```
 
-## Auth Routes
+### 2) Run PostgreSQL (Docker)
 
-| Method | Endpoint  | Description             | Auth Required |
-| ------ | --------- | ----------------------- | ------------- |
-| POST   | `/signup` | Register a new user     | ❌            |
-| POST   | `/login`  | Login and receive token | ❌            |
+```bash
+docker compose up -d
+```
 
-## URL Routes
+### 3) Configure Environment
 
-| Method | Endpoint      | Description                                | Auth Required |
-| ------ | ------------- | ------------------------------------------ | ------------- |
-| POST   | `/shorten`    | Create a short URL from a long one         | ✅            |
-| GET    | `/:shortCode` | Redirect to the original URL               | ❌            |
-| GET    | `/urls`       | Get all URLs created by the logged-in user | ✅            |
-| DELETE | `/urls/:id`   | Delete a short URL (if it belongs to user) | ✅            |
+Create or update `.env`:
+
+```env
+DATABASE_URL=postgres://postgres:admin@localhost:5432/postgres
+PORT=8000
+JWT_SECRET=your_jwt_secret
+OWNER_EMAIL=your_owner_email@example.com
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+```
+
+> `GOOGLE_CLIENT_ID` is required only if you want Google Sign-In enabled.
+
+### 4) Push Database Schema
+
+```bash
+pnpm db:push
+```
+
+### 5) Start App
+
+```bash
+pnpm dev
+```
+
+Open: **http://localhost:8000**
+
+---
+
+## 🔐 Google Sign-In Setup
+
+1. Open Google Cloud Console: https://console.cloud.google.com/
+2. Create OAuth Client ID (**Web application**)
+3. Add Authorized JavaScript origin:
+   - `http://localhost:8000`
+4. Copy the generated Client ID into `.env` as `GOOGLE_CLIENT_ID`
+5. Restart the app
+
+---
+
+## 🧑‍💻 API Endpoints
+
+### Auth
+
+- `POST /user/signup`
+- `POST /user/login`
+- `POST /user/google`
+- `GET /user/google/config`
+- `GET /user/me` (auth required)
+
+### URL
+
+- `POST /shorten` (auth required)
+- `GET /codes` (auth required)
+- `DELETE /:id` (auth required)
+- `GET /:shortcode` (public redirect)
+
+### Admin (Owner Only)
+
+- `GET /admin/overview` (auth + owner email match)
+
+---
+
+## 📁 Folder Structure
+
+```text
+URL_Shortner/
+├── db/
+├── middleware/
+├── model/
+├── public/
+│   ├── app.js
+│   ├── index.html
+│   └── styles.css
+├── routes/
+├── services/
+├── utils/
+├── validation/
+├── docker-compose.yml
+├── drizzle.config.js
+├── index.js
+├── package.json
+└── README.md
+```
+
+---
+
+## 📝 License
+
+This project is licensed under the **ISC License**.
+
+---
+
+## 📬 Contact
+
+For support or contributions, please open an issue or pull request in this repository.
